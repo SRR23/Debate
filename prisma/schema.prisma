@@ -67,6 +67,7 @@ model Debate {
   duration       Int
   createdAt      DateTime     @default(now())
   endsAt         DateTime
+  status         String       @default("active") // Add status field
   creator        User         @relation("UserDebates", fields: [creatorId], references: [id])
   creatorId      String
   participants   User[]       @relation("Participants")

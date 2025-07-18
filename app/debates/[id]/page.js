@@ -1,29 +1,44 @@
-
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
 import ArgumentForm from '../../components/ArgumentForm';
 import ArgumentList from '../../components/ArgumentList';
-import prisma from '../../lib/prisma'; // Adjust the import path as necessary
+import prisma from '../../lib/prisma';
 
 export default async function DebatePage({ params }) {
   const session = await getServerSession(authOptions);
+  // Explicitly await params to satisfy Next.js checks
+  const { id: debateId } = await Promise.resolve(params);
+
+  console.log('Params:', params);
+  console.log('Session:', session);
+
   const debate = await prisma.debate.findUnique({
-    where: { id: params.id },
+    where: { id: debateId },
     include: { creator: true, arguments: { include: { author: true, votes: true } }, participants: true },
   });
 
   if (!debate) {
+    console.log('Debate not found for ID:', debateId);
     return <div>Debate not found</div>;
   }
 
+  console.log('Debate:', debate);
+  console.log('Debate status:', debate.status);
+
   const userHasJoined = session && debate.participants.some(p => p.id === session.user.id);
+  console.log('User has joined:', userHasJoined);
+  console.log('Participants:', debate.participants);
+  console.log('Session user ID:', session?.user?.id);
+
   const userSide = userHasJoined
-    ? await prisma.argument.findFirst({
-        where: { debateId: debate.id, authorId: session.user.id },
+    ? await prisma.sideChoice.findFirst({
+        where: { debateId: debate.id, userId: session.user.id },
         select: { side: true },
       })
     : null;
+
+  console.log('User side:', userSide);
 
   async function joinDebate(formData) {
     'use server';
@@ -32,13 +47,19 @@ export default async function DebatePage({ params }) {
       redirect('/api/auth/signin');
     }
     await prisma.debate.update({
-      where: { id: params.id },
+      where: { id: debateId },
       data: {
         participants: { connect: { id: session.user.id } },
       },
     });
-    // Store side in first argument (handled in ArgumentForm)
-    redirect(`/debates/${params.id}`);
+    await prisma.sideChoice.create({
+      data: {
+        userId: session.user.id,
+        debateId: debateId,
+        side: side,
+      },
+    });
+    redirect(`/debates/${debateId}`);
   }
 
   return (
@@ -50,8 +71,13 @@ export default async function DebatePage({ params }) {
       <p className="text-sm text-gray-500 dark:text-gray-400">Ends at: {new Date(debate.endsAt).toLocaleString()}</p>
       {debate.status === 'closed' && <p className="text-lg font-semibold">Winner: {debate.winner || 'TBD'}</p>}
 
-      {!userHasJoined && debate.status === 'active' && (
-        <form action={joinDebate} className="my-4">
+      {/* Debug output to confirm button conditions */}
+      <p className="text-sm text-gray-500">
+        Debug: userHasJoined={userHasJoined.toString()}, debate.status={debate.status}
+      </p>
+
+      {!userHasJoined && debate.status === 'active' ? (
+        <form action={joinDebate} className="my-4 bg-red-200">
           <label className="block text-sm font-medium mb-2">Join Debate</label>
           <select name="side" className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
             <option value="support">Support</option>
@@ -64,11 +90,18 @@ export default async function DebatePage({ params }) {
             Join
           </button>
         </form>
+      ) : (
+        <p className="text-sm text-red-500">
+          Join button not shown: userHasJoined={userHasJoined.toString()}, debate.status={debate.status}
+        </p>
       )}
 
-      {userHasJoined && <p className="text-lg font-semibold">Your Side: {userSide?.side}</p>}
+      {userHasJoined && <p className="text-lg font-semibold">Your Side: {userSide?.side || 'Not selected'}</p>}
 
-      {debate.status === 'active' && <ArgumentForm debateId={debate.id} side={userSide?.side} />}
+      {debate.status === 'active' && userHasJoined && (
+        <ArgumentForm debateId={debate.id} side={userSide?.side} />
+      )}
+
       <ArgumentList arguments={debate.arguments} debateId={debate.id} status={debate.status} />
     </div>
   );
