@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from 'react-hook-form';
@@ -23,7 +22,7 @@ const schema = z.object({
 export default function ArgumentForm({ debateId, side }) {
   const { data: session } = useSession();
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(schema),
   });
 
@@ -33,25 +32,36 @@ export default function ArgumentForm({ debateId, side }) {
       return;
     }
 
-    const response = await fetch('/api/arguments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: data.content,
-        debateId,
-        authorId: session.user.id,
-        side,
-      }),
-    });
+    try {
+      const response = await fetch('/api/arguments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: data.content,
+          debateId,
+          authorId: session.user.id,
+          side,
+        }),
+      });
 
-    if (response.ok) {
-      router.refresh();
-    } else {
-      alert('Failed to post argument');
+      if (response.ok) {
+        reset(); // Clear the form
+        router.refresh(); // Refresh the page
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to post argument:', errorData);
+        alert(`Failed to post argument: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error submitting argument:', error);
+      alert('An error occurred while submitting the argument');
     }
   };
 
-  if (!side) return null;
+  if (!side) {
+    console.log('ArgumentForm: No side provided, debateId=', debateId);
+    return null;
+  }
 
   return (
     <motion.div
@@ -65,6 +75,8 @@ export default function ArgumentForm({ debateId, side }) {
           <textarea
             {...register('content')}
             className="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600"
+            rows="4"
+            placeholder="Write your argument here..."
           />
           {errors.content && <p className="text-red-500 text-sm">{errors.content.message}</p>}
         </div>

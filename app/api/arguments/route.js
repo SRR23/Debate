@@ -1,47 +1,45 @@
-
 import { getServerSession } from 'next-auth/next';
+import prisma from '@/app/lib/prisma';
 import { authOptions } from '../auth/[...nextauth]/route';
 
-export async function POST(req) {
+export async function POST(request) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
 
-  const { content, debateId, authorId, side } = await req.json();
+  const { content, debateId, authorId, side } = await request.json();
+
+  if (!content || !debateId || !authorId || !side) {
+    return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
+  }
 
   try {
     const argument = await prisma.argument.create({
       data: {
         content,
+        side,
         debateId,
         authorId,
-        side,
       },
     });
     return new Response(JSON.stringify(argument), { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to post argument' }), { status: 500 });
+    console.error('Error creating argument:', error);
+    return new Response(JSON.stringify({ error: 'Failed to create argument' }), { status: 500 });
   }
 }
 
-export async function DELETE(req) {
+export async function DELETE(request) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
 
-  const { argumentId } = await req.json();
-  const argument = await prisma.argument.findUnique({
-    where: { id: argumentId },
-  });
+  const { argumentId } = await request.json();
 
-  if (argument.authorId !== session.user.id) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-  }
-
-  if (new Date(argument.createdAt).getTime() < Date.now() - 5 * 60 * 1000) {
-    return new Response(JSON.stringify({ error: 'Edit window expired' }), { status: 403 });
+  if (!argumentId) {
+    return new Response(JSON.stringify({ error: 'Missing argumentId' }), { status: 400 });
   }
 
   try {
@@ -50,6 +48,7 @@ export async function DELETE(req) {
     });
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
+    console.error('Error deleting argument:', error);
     return new Response(JSON.stringify({ error: 'Failed to delete argument' }), { status: 500 });
   }
 }

@@ -25,6 +25,7 @@ export default async function DebatePage({ params }) {
 
   console.log('Debate:', debate);
   console.log('Debate status:', debate.status);
+  console.log('Arguments:', debate.arguments);
 
   const userHasJoined = session && debate.participants.some(p => p.id === session.user.id);
   console.log('User has joined:', userHasJoined);
@@ -46,20 +47,25 @@ export default async function DebatePage({ params }) {
     if (!session) {
       redirect('/api/auth/signin');
     }
-    await prisma.debate.update({
-      where: { id: debateId },
-      data: {
-        participants: { connect: { id: session.user.id } },
-      },
-    });
-    await prisma.sideChoice.create({
-      data: {
-        userId: session.user.id,
-        debateId: debateId,
-        side: side,
-      },
-    });
-    redirect(`/debates/${debateId}`);
+    try {
+      await prisma.debate.update({
+        where: { id: debateId },
+        data: {
+          participants: { connect: { id: session.user.id } },
+        },
+      });
+      await prisma.sideChoice.create({
+        data: {
+          userId: session.user.id,
+          debateId: debateId,
+          side: side,
+        },
+      });
+      redirect(`/debates/${debateId}`);
+    } catch (error) {
+      console.error('Error joining debate:', error);
+      throw new Error('Failed to join debate');
+    }
   }
 
   return (
@@ -73,7 +79,7 @@ export default async function DebatePage({ params }) {
 
       {/* Debug output to confirm button conditions */}
       <p className="text-sm text-gray-500">
-        Debug: userHasJoined={userHasJoined.toString()}, debate.status={debate.status}
+        Debug: userHasJoined={userHasJoined.toString()}, debate.status={debate.status}, userSide={userSide?.side || 'none'}
       </p>
 
       {!userHasJoined && debate.status === 'active' ? (
@@ -102,7 +108,7 @@ export default async function DebatePage({ params }) {
         <ArgumentForm debateId={debate.id} side={userSide?.side} />
       )}
 
-      <ArgumentList arguments={debate.arguments} debateId={debate.id} status={debate.status} />
+      <ArgumentList argumentList={debate.arguments} debateId={debate.id} status={debate.status} />
     </div>
   );
 }

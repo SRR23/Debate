@@ -9,36 +9,56 @@ export default function ArgumentList({ argumentList, debateId, status }) {
   const { data: session } = useSession();
   const router = useRouter();
 
+  console.log('ArgumentList: argumentList=', argumentList);
+  console.log('ArgumentList: session.user.id=', session?.user?.id);
+
   const handleVote = async (argumentId) => {
     if (!session) {
       alert('Please log in to vote');
       return;
     }
 
-    const response = await fetch('/api/votes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ argumentId, userId: session.user.id }),
-    });
+    console.log('Attempting to vote: argumentId=', argumentId, 'userId=', session.user.id);
 
-    if (response.ok) {
-      router.refresh();
-    } else {
-      alert('Failed to vote');
+    try {
+      const response = await fetch('/api/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ argumentId, userId: session.user.id }),
+      });
+
+      if (response.ok) {
+        console.log('Vote successful: argumentId=', argumentId);
+        router.refresh();
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to vote:', errorData);
+        alert(`Failed to vote: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+      alert('An error occurred while voting');
     }
   };
 
   const handleDelete = async (argumentId) => {
-    const response = await fetch('/api/arguments', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ argumentId }),
-    });
+    try {
+      const response = await fetch('/api/arguments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ argumentId }),
+      });
 
-    if (response.ok) {
-      router.refresh();
-    } else {
-      alert('Failed to delete argument');
+      if (response.ok) {
+        router.refresh();
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to delete argument:', errorData);
+        alert(`Failed to delete argument: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting argument:', error);
+      alert('An error occurred while deleting the argument');
     }
   };
 
@@ -61,9 +81,9 @@ export default function ArgumentList({ argumentList, debateId, status }) {
             >
               <p className="font-semibold">{arg.side.toUpperCase()}: {arg.content}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                By {arg.author.name} at {new Date(arg.createdAt).toLocaleString()}
+                By {arg.author.name || 'Anonymous'} at {new Date(arg.createdAt).toLocaleString()}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Votes: {arg.voteCount}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Votes: {arg.votes.length}</p>
               {status === 'active' && (
                 <button
                   onClick={() => handleVote(arg.id)}
@@ -89,3 +109,21 @@ export default function ArgumentList({ argumentList, debateId, status }) {
     </div>
   );
 }
+
+ArgumentList.propTypes = {
+  argumentList: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      content: PropTypes.string.isRequired,
+      side: PropTypes.string.isRequired,
+      createdAt: PropTypes.string.isRequired,
+      author: PropTypes.shape({
+        name: PropTypes.string,
+      }).isRequired,
+      votes: PropTypes.array.isRequired,
+      authorId: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  debateId: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+};
