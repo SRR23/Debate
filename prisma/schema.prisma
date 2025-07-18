@@ -1,0 +1,67 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  name        String?
+  debates     Debate[]     @relation("UserDebates")
+  joinedDebates  Debate[]     @relation("Participants")  
+  arguments   Argument[]   @relation("UserArguments")
+  votes       Vote[]       @relation("UserVotes")
+  sideChoices SideChoice[] @relation("UserSideChoices")
+}
+
+model Debate {
+  id             String       @id @default(uuid())
+  title          String
+  description    String
+  tags           String[]
+  category       String
+  image          String?
+  duration       Int
+  createdAt      DateTime     @default(now())
+  endsAt         DateTime
+  creator        User         @relation("UserDebates", fields: [creatorId], references: [id])
+  creatorId      String
+
+  participants   User[]       @relation("Participants")        // users who joined ✅
+  arguments      Argument[]
+  sideChoices    SideChoice[]
+}
+
+model Argument {
+  id        String   @id @default(uuid())
+  content   String
+  side      String // "Support" or "Oppose"
+  debate    Debate   @relation(fields: [debateId], references: [id])
+  debateId  String
+  author    User     @relation("UserArguments", fields: [authorId], references: [id])
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  votes     Vote[]
+}
+
+model SideChoice {
+  id       String @id @default(uuid())
+  user     User   @relation("UserSideChoices", fields: [userId], references: [id])
+  userId   String
+  debate   Debate @relation(fields: [debateId], references: [id])
+  debateId String
+  side     String // "Support" or "Oppose"
+}
+
+model Vote {
+  id         String   @id @default(uuid())
+  user       User     @relation("UserVotes", fields: [userId], references: [id])
+  userId     String
+  argument   Argument @relation(fields: [argumentId], references: [id])
+  argumentId String
+}
