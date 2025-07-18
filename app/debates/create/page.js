@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../api/auth/[...nextauth]/route';
-import DebateForm from '../../../components/DebateForm';
 import { redirect } from 'next/navigation';
+import DebateForm from '../../components/DebateForm'; // Adjust the import path as necessary
 
 export default async function CreateDebate() {
   const session = await getServerSession(authOptions);
