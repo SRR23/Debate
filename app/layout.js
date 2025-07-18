@@ -1,9 +1,10 @@
+// app/layout.js
 import './globals.css';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './api/auth/[...nextauth]/route';
 import Link from 'next/link';
 import ThemeToggle from './components/ThemeToggle';
-import { signOut } from 'next-auth/react';
+import SignOutButton from './components/SignOutButton'; // Import the new component
 
 export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
@@ -23,12 +24,7 @@ export default async function RootLayout({ children }) {
               {session ? (
                 <>
                   <span>{session.user.name}</span>
-                  <button
-                    onClick={() => signOut()}
-                    className="py-1 px-3 bg-red-600 rounded hover:bg-red-700"
-                  >
-                    Sign Out
-                  </button>
+                  <SignOutButton /> {/* Use the Client Component */}
                 </>
               ) : (
                 <Link href="/api/auth/signin">

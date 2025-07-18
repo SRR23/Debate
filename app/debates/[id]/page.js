@@ -1,9 +1,10 @@
-import prisma from '../../../lib/prisma';
+
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../api/auth/[...nextauth]/route';
-import ArgumentForm from '../../../components/ArgumentForm';
-import ArgumentList from '../../../components/ArgumentList';
 import { redirect } from 'next/navigation';
+import ArgumentForm from '../../components/ArgumentForm';
+import ArgumentList from '../../components/ArgumentList';
+import prisma from '../../lib/prisma'; // Adjust the import path as necessary
 
 export default async function DebatePage({ params }) {
   const session = await getServerSession(authOptions);
