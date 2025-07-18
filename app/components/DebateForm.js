@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 const schema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
@@ -19,9 +20,19 @@ const schema = z.object({
 export default function DebateForm() {
   const { data: session } = useSession();
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm({
     resolver: zodResolver(schema),
   });
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setImagePreview(imageUrl);
+      setValue('image', imageUrl);
+    }
+  };
 
   const onSubmit = async (data) => {
     if (!session) {
@@ -89,11 +100,31 @@ export default function DebateForm() {
           {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium">Image URL (optional)</label>
-          <input
-            {...register('image')}
-            className="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600"
-          />
+          <label className="block text-sm font-medium">Image</label>
+          <div className="mt-1 flex items-center space-x-4">
+            <label className="py-2 px-4 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
+              Choose Image
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </label>
+            {imagePreview && (
+              <div className="flex items-center space-x-2">
+                <img src={imagePreview} alt="Preview" className="h-12 w-12 object-cover rounded" />
+                <a
+                  href={imagePreview}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  View Image
+                </a>
+              </div>
+            )}
+          </div>
           {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
         </div>
         <div>
