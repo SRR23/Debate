@@ -6,6 +6,7 @@ export default async function Debates() {
   const debates = await prisma.debate.findMany({
     include: { creator: true },
   });
+  console.log('Debates:', debates); // Log to inspect image fields
 
   return (
     <div className="container mx-auto py-8">

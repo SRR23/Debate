@@ -13,7 +13,7 @@ const schema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   tags: z.string().transform((val) => val.split(',').map(tag => tag.trim())),
   category: z.string().min(1, 'Category is required'),
-  image: z.string().url().optional(),
+  image: z.instanceof(File).optional(), // Changed to File type for proper validation
   duration: z.enum(['1', '12', '24'], { message: 'Invalid duration' }),
 });
 
@@ -24,13 +24,15 @@ export default function DebateForm() {
     resolver: zodResolver(schema),
   });
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null); // Added to store the file
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
-      setValue('image', imageUrl);
+      setImageFile(file); // Store the file
+      setValue('image', file); // Set the file in the form
     }
   };
 
@@ -40,23 +42,36 @@ export default function DebateForm() {
       return;
     }
 
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('tags', JSON.stringify(data.tags)); // Stringify tags array
+    formData.append('category', data.category);
+    formData.append('duration', data.duration);
+    formData.append('creatorId', session.user.id);
+
     const endsAt = new Date();
     endsAt.setHours(endsAt.getHours() + parseInt(data.duration));
+    formData.append('endsAt', endsAt.toISOString());
 
-    const response = await fetch('/api/debates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...data,
-        creatorId: session.user.id,
-        endsAt,
-      }),
-    });
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
 
-    if (response.ok) {
-      router.push('/debates');
-    } else {
-      alert('Failed to create debate');
+    try {
+      const response = await fetch('/api/debates', {
+        method: 'POST',
+        body: formData, // Send FormData directly
+      });
+
+      if (response.ok) {
+        router.push('/debates');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to create debate: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      alert(`Error creating debate: ${error.message}`);
     }
   };
 

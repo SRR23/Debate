@@ -6,8 +6,11 @@ import PropTypes from 'prop-types';
 import Image from 'next/image'; // Use Next.js Image component for optimization
 
 export default function DebateCard({ debate }) {
-  // Fallback image URL for when debate.imageUrl is invalid or missing
-  const fallbackImage = '/images/fallback.jpg'; // Replace with your fallback image path
+  // Fallback image URL for when debate.image is invalid or missing
+  const fallbackImage = '/images/next.svg'; // Ensure this exists in your public folder
+
+  // Log the image URL for debugging
+  console.log('Debate image:', debate.image);
 
   return (
     <motion.div
@@ -19,9 +22,9 @@ export default function DebateCard({ debate }) {
       <p className="text-gray-600 dark:text-gray-300">{debate.description}</p>
       <p className="text-sm text-gray-500 dark:text-gray-400">Category: {debate.category}</p>
       <p className="text-sm text-gray-500 dark:text-gray-400">Tags: {debate.tags.join(', ')}</p>
-      {debate.imageUrl ? (
+      {debate.image ? (
         <Image
-          src={debate.imageUrl}
+          src={debate.image} // Changed from imageUrl to image
           alt={debate.title}
           width={640} // Adjust based on your design
           height={192} // Matches h-48 (48 * 4 = 192px)
@@ -53,6 +56,6 @@ DebateCard.propTypes = {
     description: PropTypes.string.isRequired,
     category: PropTypes.string.isRequired,
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-    imageUrl: PropTypes.string,
+    image: PropTypes.string, // Changed from imageUrl to image
   }).isRequired,
 };
