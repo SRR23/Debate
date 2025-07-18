@@ -34,9 +34,9 @@ export default async function DebatePage({ params }) {
 
   const userSide = userHasJoined
     ? await prisma.sideChoice.findFirst({
-        where: { debateId: debate.id, userId: session.user.id },
-        select: { side: true },
-      })
+      where: { debateId: debate.id, userId: session.user.id },
+      select: { side: true },
+    })
     : null;
 
   console.log('User side:', userSide);
@@ -79,7 +79,9 @@ export default async function DebatePage({ params }) {
 
       {/* Debug output to confirm button conditions */}
       <p className="text-sm text-gray-500">
-        Debug: userHasJoined={userHasJoined.toString()}, debate.status={debate.status}, userSide={userSide?.side || 'none'}
+        Debug: userHasJoined={String(userHasJoined)},
+        debate.status={debate.status},
+        userSide={userSide?.side || 'none'}
       </p>
 
       {!userHasJoined && debate.status === 'active' ? (
