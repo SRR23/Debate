@@ -1,10 +1,11 @@
-"use client";
+'use client';
 
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const bannedWords = ['stupid', 'idiot', 'dumb', 'mental', 'psycho', 'fuck'];
@@ -25,9 +26,37 @@ export default function ArgumentForm({ debateId, side, endTime }) {
   const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(schema),
   });
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [joinTimeout, setJoinTimeout] = useState(null);
+  const [hasPosted, setHasPosted] = useState(false);
 
   // Check if the debate has expired
   const isDebateExpired = endTime && new Date(endTime) < new Date();
+
+  // Handle Join Debate button click
+  const handleJoinClick = () => {
+    if (!session) {
+      alert('Please log in to join the debate');
+      return;
+    }
+    setIsFormVisible(true);
+    // Set 5-minute timeout for first argument
+    if (!hasPosted) {
+      const timeoutId = setTimeout(() => {
+        setIsFormVisible(false);
+      }, 300000); // 5 minutes = 300,000 ms
+      setJoinTimeout(timeoutId);
+    }
+  };
+
+  // Clear timeout when component unmounts or form is submitted
+  useEffect(() => {
+    return () => {
+      if (joinTimeout) {
+        clearTimeout(joinTimeout);
+      }
+    };
+  }, [joinTimeout]);
 
   const onSubmit = async (data) => {
     if (!session) {
@@ -54,6 +83,11 @@ export default function ArgumentForm({ debateId, side, endTime }) {
 
       if (response.ok) {
         reset(); // Clear the form
+        setIsFormVisible(false); // Hide form after submission
+        setHasPosted(true); // Mark that an argument has been posted
+        if (joinTimeout) {
+          clearTimeout(joinTimeout); // Clear the timeout
+        }
         router.refresh(); // Refresh the page
       } else {
         const errorData = await response.json();
@@ -83,6 +117,24 @@ export default function ArgumentForm({ debateId, side, endTime }) {
     );
   }
 
+  if (!isFormVisible) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="my-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow"
+      >
+        <button
+          onClick={handleJoinClick}
+          className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+          disabled={!session}
+        >
+          Join Debate
+        </button>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -97,17 +149,31 @@ export default function ArgumentForm({ debateId, side, endTime }) {
             className="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600"
             rows="4"
             placeholder="Write your argument here..."
-            disabled={isDebateExpired} // Optional: Disable the textarea
+            disabled={isDebateExpired}
           />
           {errors.content && <p className="text-red-500 text-sm">{errors.content.message}</p>}
         </div>
-        <button
-          type="submit"
-          className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600"
-          disabled={isDebateExpired} // Disable the button
-        >
-          Post Argument
-        </button>
+        <div className="flex space-x-2">
+          <button
+            type="submit"
+            className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600"
+            disabled={isDebateExpired}
+          >
+            Post Argument
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsFormVisible(false);
+              if (joinTimeout) {
+                clearTimeout(joinTimeout);
+              }
+            }}
+            className="py-2 px-4 bg-gray-300 text-black rounded hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+          >
+            Cancel
+          </button>
+        </div>
       </form>
     </motion.div>
   );

@@ -60,10 +60,10 @@ export default function LeaderboardTable({ leaderboard, filter }) {
         <table className="w-full">
           <thead>
             <tr className="bg-gray-200 dark:bg-gray-700">
-              <th className="p-2">Rank</th>
-              <th className="p-2">User</th>
-              <th className="p-2">Total Votes</th>
-              <th className="p-2">Debates Joined</th>
+              <th className="p-2 text-center">Rank</th>
+              <th className="p-2 text-center">User</th>
+              <th className="p-2 text-center">Total Votes</th>
+              <th className="p-2 text-center">Debates Joined</th>
             </tr>
           </thead>
           <tbody>
@@ -75,10 +75,10 @@ export default function LeaderboardTable({ leaderboard, filter }) {
                 transition={{ delay: index * 0.1 }}
                 className="border-t dark:border-gray-600"
               >
-                <td className="p-2">{index + 1}</td>
-                <td className="p-2">{user.name}</td>
-                <td className="p-2">{user.totalVotes}</td>
-                <td className="p-2">{user.debatesCount}</td>
+                <td className="p-2 text-center">{index + 1}</td>
+                <td className="p-2 text-center">{user.name}</td>
+                <td className="p-2 text-center">{user.totalVotes}</td>
+                <td className="p-2 text-center">{user.debatesCount}</td>
               </motion.tr>
             ))}
           </tbody>
