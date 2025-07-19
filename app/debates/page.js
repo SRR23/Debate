@@ -2,7 +2,9 @@ import DebateCard from '../components/DebateCard';
 import prisma from '../lib/prisma';
 
 export default async function Debates({ searchParams }) {
-  const q = searchParams?.search || '';
+  // Await searchParams to resolve the Promise
+  const resolvedSearchParams = await searchParams;
+  const q = resolvedSearchParams?.search || '';
 
   // Fetch debates based on search query
   const debates = await prisma.debate.findMany({
