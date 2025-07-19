@@ -6,6 +6,8 @@ import Link from 'next/link';
 import ThemeToggle from './components/ThemeToggle';
 import SignOutButton from './components/SignOutButton'; // Import the new component
 import SessionProviderWrapper from './components/SessionProviderWrapper'; // Import the SessionProviderWrapper
+import SearchForm from './components/SearchForm'; // Import the SearchForm component
+
 
 export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
@@ -21,6 +23,7 @@ export default async function RootLayout({ children }) {
                 <Link href="/debates">Debates</Link>
                 <Link href="/scoreboard">Scoreboard</Link>
                 {session && <Link href="/debates/create">Create Debate</Link>}
+                <SearchForm />
               </div>
               <div className="flex items-center space-x-4">
                 {session ? (
