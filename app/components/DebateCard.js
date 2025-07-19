@@ -4,8 +4,14 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
+import DebateCardSkeleton from '../skeleton/DebateCardSkeleton';
 
-export default function DebateCard({ debate }) {
+export default function DebateCard({ debate, isLoading }) {
+
+  if (isLoading) {
+    return <DebateCardSkeleton />;
+  }
+
   // Fallback image URL for when debate.image is invalid or missing
   const fallbackImage = '/images/next.svg';
 

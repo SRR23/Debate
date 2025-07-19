@@ -1,11 +1,11 @@
 "use client";
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
-
 
 export default function LeaderboardTable({ leaderboard, filter }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const shouldReduceMotion = useReducedMotion();
 
   const handleFilterChange = (newFilter) => {
     const params = new URLSearchParams(searchParams);
@@ -29,7 +29,6 @@ export default function LeaderboardTable({ leaderboard, filter }) {
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      {/* Header Section */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -41,8 +40,6 @@ export default function LeaderboardTable({ leaderboard, filter }) {
               <p className="text-indigo-100 text-sm">Top debaters by performance</p>
             </div>
           </div>
-          
-          {/* Filter Buttons */}
           <div className="inline-flex bg-white/10 backdrop-blur-sm rounded-xl p-1" role="group">
             <button
               type="button"
@@ -81,11 +78,11 @@ export default function LeaderboardTable({ leaderboard, filter }) {
         </div>
       </div>
 
-      {/* Content */}
       {leaderboard.length === 0 ? (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+          animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+          transition={shouldReduceMotion ? {} : { duration: 0.3 }}
           className="p-12 text-center"
         >
           <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
@@ -125,19 +122,19 @@ export default function LeaderboardTable({ leaderboard, filter }) {
               {leaderboard.map((user, index) => (
                 <motion.tr
                   key={user.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.3 }}
-                  className={`transition-all duration-200 ${getRankStyle(index + 1)}`}
+                  initial={shouldReduceMotion ? {} : { opacity: 0 }}
+                  animate={shouldReduceMotion ? {} : { opacity: 1 }}
+                  transition={shouldReduceMotion ? {} : { duration: 0.2 }}
+                  className={`transition-colors duration-200 ${getRankStyle(index + 1)}`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-3">
                       {getRankIcon(index + 1)}
-                      <span className={`text-lg font-bold ${
-                        index + 1 <= 3 
-                          ? 'text-gray-900 dark:text-white' 
-                          : 'text-gray-600 dark:text-gray-300'
-                      }`}>
+                      <span
+                        className={`text-lg font-bold ${
+                          index + 1 <= 3 ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'
+                        }`}
+                      >
                         {index + 1}
                       </span>
                     </div>
@@ -148,9 +145,7 @@ export default function LeaderboardTable({ leaderboard, filter }) {
                         {user.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {user.name}
-                        </div>
+                        <div className="text-lg font-semibold text-gray-900 dark:text-white">{user.name}</div>
                         {index + 1 <= 3 && (
                           <div className="text-xs text-gray-500 dark:text-gray-400">
                             {index + 1 === 1 ? 'Champion' : index + 1 === 2 ? 'Runner-up' : 'Third Place'}

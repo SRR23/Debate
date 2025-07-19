@@ -104,4 +104,8 @@ model Vote {
   argument   Argument @relation(fields: [argumentId], references: [id])
   argumentId String
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([argumentId])
+  @@index([userId])
 }
