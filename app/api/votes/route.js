@@ -44,7 +44,7 @@ export async function POST(request) {
 
     return new Response(JSON.stringify(vote), { status: 200 });
   } catch (error) {
-    console.error('Error creating vote:', error);
+    // console.error('Error creating vote:', error);
     return new Response(JSON.stringify({ error: 'Failed to create vote' }), { status: 500 });
   }
 }

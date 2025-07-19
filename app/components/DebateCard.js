@@ -4,13 +4,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
-import DebateCardSkeleton from '../skeleton/DebateCardSkeleton';
 
-export default function DebateCard({ debate, isLoading }) {
-
-  if (isLoading) {
-    return <DebateCardSkeleton />;
-  }
+export default function DebateCard({ debate }) {
 
   // Fallback image URL for when debate.image is invalid or missing
   const fallbackImage = '/images/next.svg';
@@ -18,9 +13,7 @@ export default function DebateCard({ debate, isLoading }) {
   // Check if the debate has expired based on endsAt or status
   const isDebateExpired = debate.status !== 'active' || (debate.endsAt && new Date(debate.endsAt) < new Date());
 
-  // Log the image URL and expiration status for debugging
-  console.log('Debate image:', debate.image);
-  console.log('Debate status:', debate.status, 'endsAt:', debate.endsAt, 'isDebateExpired:', isDebateExpired);
+
 
   return (
     <motion.div

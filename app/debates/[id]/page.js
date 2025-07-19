@@ -1,18 +1,20 @@
 import { getServerSession } from 'next-auth/next';
 import { revalidatePath } from 'next/cache';
+import { Suspense } from 'react';
 import { authOptions } from '../../api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
 import ArgumentForm from '../../components/ArgumentForm';
 import ArgumentList from '../../components/ArgumentList';
 import prisma from '../../lib/prisma';
+import DebatePageSkeleton from '@/app/skeleton/DebatePageSkeleton';
+
 
 export default async function DebatePage({ params }) {
+
+  // Fetch session and params
   const session = await getServerSession(authOptions);
   // Explicitly await params to satisfy Next.js checks
   const { id: debateId } = await Promise.resolve(params);
-
-  console.log('Params:', params);
-  console.log('Session:', session);
 
   const debate = await prisma.debate.findUnique({
     where: { id: debateId },
@@ -36,23 +38,14 @@ export default async function DebatePage({ params }) {
     );
   }
 
-  console.log('Debate:', debate);
-  console.log('Debate status:', debate.status);
-  console.log('Arguments:', debate.arguments);
-
   const userHasJoined = session && debate.participants.some(p => p.id === session.user.id);
-  console.log('User has joined:', userHasJoined);
-  console.log('Participants:', debate.participants);
-  console.log('Session user ID:', session?.user?.id);
-
+ 
   const userSide = userHasJoined
     ? await prisma.sideChoice.findFirst({
       where: { debateId: debate.id, userId: session.user.id },
       select: { side: true },
     })
     : null;
-
-  console.log('User side:', userSide);
 
   // Check if the debate has expired based on status or endsAt
   const isDebateExpired = debate.status !== 'active' || (debate.endsAt && new Date(debate.endsAt) < new Date());
@@ -103,32 +96,32 @@ export default async function DebatePage({ params }) {
   }
 
   return (
+    <Suspense fallback={<DebatePageSkeleton />}>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        
+
         {/* Header Section with Image */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden mb-8 border border-gray-100 dark:border-gray-700">
-          
+
           {/* Hero Image if available */}
           {debate.image && (
             <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
-              <img 
-                src={debate.image} 
+              <img
+                src={debate.image}
                 alt={debate.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-              
+
               {/* Floating status badges on image */}
               <div className="absolute top-6 left-6 flex flex-wrap items-center gap-3">
-                <span className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border ${
-                  debate.status === 'active' 
-                    ? 'bg-green-100/90 text-green-800 border-green-200/50 dark:bg-green-900/80 dark:text-green-200 dark:border-green-700/50' 
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border ${debate.status === 'active'
+                    ? 'bg-green-100/90 text-green-800 border-green-200/50 dark:bg-green-900/80 dark:text-green-200 dark:border-green-700/50'
                     : 'bg-red-100/90 text-red-800 border-red-200/50 dark:bg-red-900/80 dark:text-red-200 dark:border-red-700/50'
-                }`}>
+                  }`}>
                   {debate.status === 'active' ? '🟢 Active Debate' : '🔴 Debate Ended'}
                 </span>
-                
+
                 {isDebateExpired && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-amber-100/90 dark:bg-amber-900/80 text-amber-800 dark:text-amber-200 rounded-full text-sm font-semibold backdrop-blur-md border border-amber-200/50 dark:border-amber-700/50">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,14 +153,13 @@ export default async function DebatePage({ params }) {
             {!debate.image && (
               <div>
                 <div className="flex flex-wrap items-center gap-3 mb-6">
-                  <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                    debate.status === 'active' 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                  <span className={`px-4 py-2 rounded-full text-sm font-semibold ${debate.status === 'active'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                       : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                  }`}>
+                    }`}>
                     {debate.status === 'active' ? '🟢 Active Debate' : '🔴 Debate Ended'}
                   </span>
-                  
+
                   {isDebateExpired && (
                     <div className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 rounded-full text-sm font-semibold">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +181,7 @@ export default async function DebatePage({ params }) {
                 </div>
               </div>
             )}
-            
+
             {/* Description */}
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
               {debate.description}
@@ -268,14 +260,14 @@ export default async function DebatePage({ params }) {
                   <p className="text-gray-600 dark:text-gray-300 text-sm">Choose your side and start debating</p>
                 </div>
               </div>
-              
+
               <form action={joinDebate} className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Select Your Position
                   </label>
-                  <select 
-                    name="side" 
+                  <select
+                    name="side"
                     className="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all duration-200"
                   >
                     <option value="support">👍 Support</option>
@@ -297,26 +289,23 @@ export default async function DebatePage({ params }) {
           {userHasJoined && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  userSide?.side === 'support' 
-                    ? 'bg-green-100 dark:bg-green-900/30' 
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${userSide?.side === 'support'
+                    ? 'bg-green-100 dark:bg-green-900/30'
                     : 'bg-red-100 dark:bg-red-900/30'
-                }`}>
-                  <svg className={`w-6 h-6 ${
-                    userSide?.side === 'support' 
-                      ? 'text-green-600 dark:text-green-400' 
+                  }`}>
+                  <svg className={`w-6 h-6 ${userSide?.side === 'support'
+                      ? 'text-green-600 dark:text-green-400'
                       : 'text-red-600 dark:text-red-400'
-                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7-7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">Your Position</h3>
-                  <p className={`font-semibold text-lg ${
-                    userSide?.side === 'support' 
-                      ? 'text-green-600 dark:text-green-400' 
+                  <p className={`font-semibold text-lg ${userSide?.side === 'support'
+                      ? 'text-green-600 dark:text-green-400'
                       : 'text-red-600 dark:text-red-400'
-                  }`}>
+                    }`}>
                     {userSide?.side === 'support' ? '👍 Supporting' : '👎 Opposing'}
                   </p>
                 </div>
@@ -362,14 +351,15 @@ export default async function DebatePage({ params }) {
               {debate.arguments.length} argument{debate.arguments.length !== 1 ? 's' : ''} posted
             </p>
           </div>
-          <ArgumentList 
-            argumentList={debate.arguments} 
-            debateId={debate.id} 
-            status={debate.status} 
-            endTime={debate.endsAt} 
+          <ArgumentList
+            argumentList={debate.arguments}
+            debateId={debate.id}
+            status={debate.status}
+            endTime={debate.endsAt}
           />
         </div>
       </div>
     </div>
+    </Suspense>
   );
 }

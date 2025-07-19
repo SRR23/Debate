@@ -91,17 +91,17 @@ export default function ArgumentForm({ debateId, side, endTime }) {
         router.refresh(); // Refresh the page
       } else {
         const errorData = await response.json();
-        console.error('Failed to post argument:', errorData);
+        // console.error('Failed to post argument:', errorData);
         alert(`Failed to post argument: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error submitting argument:', error);
+      // console.error('Error submitting argument:', error);
       alert('An error occurred while submitting the argument');
     }
   };
 
   if (!side) {
-    console.log('ArgumentForm: No side provided, debateId=', debateId);
+    // console.log('ArgumentForm: No side provided, debateId=', debateId);
     return null;
   }
 

@@ -10,9 +10,6 @@ export default function ArgumentList({ argumentList, debateId, status, endTime }
   const { data: session } = useSession();
   const router = useRouter();
 
-  console.log('ArgumentList: argumentList=', argumentList);
-  console.log('ArgumentList: session.user.id=', session?.user?.id);
-
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState('');
 
@@ -55,8 +52,6 @@ export default function ArgumentList({ argumentList, debateId, status, endTime }
       return;
     }
 
-    console.log('Attempting to vote: argumentId=', argumentId, 'userId=', session.user.id);
-
     try {
       const response = await fetch('/api/votes', {
         method: 'POST',
@@ -65,15 +60,15 @@ export default function ArgumentList({ argumentList, debateId, status, endTime }
       });
 
       if (response.ok) {
-        console.log('Vote successful: argumentId=', argumentId);
+        // console.log('Vote successful: argumentId=', argumentId);
         router.refresh();
       } else {
         const errorData = await response.json();
-        console.error('Failed to vote:', errorData);
+        // console.error('Failed to vote:', errorData);
         alert(`Failed to vote: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error voting:', error);
+      // console.error('Error voting:', error);
       alert('An error occurred while voting');
     }
   };
@@ -90,11 +85,11 @@ export default function ArgumentList({ argumentList, debateId, status, endTime }
         router.refresh();
       } else {
         const errorData = await response.json();
-        console.error('Failed to delete argument:', errorData);
+        // console.error('Failed to delete argument:', errorData);
         alert(`Failed to delete argument: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error deleting argument:', error);
+      // console.error('Error deleting argument:', error);
       alert('An error occurred while deleting the argument');
     }
   };

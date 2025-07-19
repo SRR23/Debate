@@ -76,7 +76,7 @@ export async function POST(req) {
 
     return new Response(JSON.stringify(debate), { status: 200 });
   } catch (error) {
-    console.error('Error creating debate:', error);
+    // console.error('Error creating debate:', error);
     return new Response(JSON.stringify({ error: 'Failed to create debate' }), { status: 500 });
   }
 }
@@ -88,7 +88,7 @@ export async function GET() {
     });
     return new Response(JSON.stringify(debates), { status: 200 });
   } catch (error) {
-    console.error('Error fetching debates:', error);
+    // console.error('Error fetching debates:', error);
     return new Response(JSON.stringify({ error: 'Failed to fetch debates' }), { status: 500 });
   }
 }
