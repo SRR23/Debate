@@ -1,4 +1,5 @@
 import { getServerSession } from 'next-auth/next';
+import { revalidatePath } from 'next/cache';
 import { authOptions } from '../../api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
 import ArgumentForm from '../../components/ArgumentForm';
@@ -41,11 +42,31 @@ export default async function DebatePage({ params }) {
 
   console.log('User side:', userSide);
 
+  // Check if the debate has expired based on status or endsAt
+  const isDebateExpired = debate.status !== 'active' || (debate.endsAt && new Date(debate.endsAt) < new Date());
+
+  // Calculate winning side based on the argument with the maximum votes
+  let winningSide = 'TBD';
+  if (isDebateExpired && debate.arguments.length > 0) {
+    const maxVotedArgument = debate.arguments.reduce((maxArg, arg) => {
+      const voteCount = arg.votes.reduce((sum, vote) => sum + (vote.value || 0), 0);
+      const maxVoteCount = maxArg ? maxArg.votes.reduce((sum, vote) => sum + (vote.value || 0), 0) : -Infinity;
+      return voteCount > maxVoteCount ? arg : maxArg;
+    }, null);
+
+    winningSide = maxVotedArgument ? maxVotedArgument.side : 'Tie';
+  } else if (isDebateExpired && debate.arguments.length === 0) {
+    winningSide = 'No arguments';
+  }
+
   async function joinDebate(formData) {
     'use server';
     const side = formData.get('side');
     if (!session) {
       redirect('/api/auth/signin');
+    }
+    if (isDebateExpired) {
+      throw new Error('Debate has ended. You cannot join now.');
     }
     try {
       await prisma.debate.update({
@@ -61,10 +82,11 @@ export default async function DebatePage({ params }) {
           side: side,
         },
       });
-      redirect(`/debates/${debateId}`);
+      // Revalidate the current page to refresh server-side data
+      revalidatePath(`/debate/${debateId}`);
+      return { success: true };
     } catch (error) {
-      console.error('Error joining debate:', error);
-      throw new Error('Failed to join debate');
+      throw new Error('Failed to join debate. Please try again later.');
     }
   }
 
@@ -75,16 +97,17 @@ export default async function DebatePage({ params }) {
       <p className="text-sm text-gray-500 dark:text-gray-400">Category: {debate.category}</p>
       <p className="text-sm text-gray-500 dark:text-gray-400">Tags: {debate.tags.join(', ')}</p>
       <p className="text-sm text-gray-500 dark:text-gray-400">Ends at: {new Date(debate.endsAt).toLocaleString()}</p>
-      {debate.status === 'closed' && <p className="text-lg font-semibold">Winner: {debate.winner || 'TBD'}</p>}
+      {isDebateExpired && <p className="text-lg font-semibold">Winner: {winningSide}</p>}
 
       {/* Debug output to confirm button conditions */}
       <p className="text-sm text-gray-500">
-        Debug: userHasJoined={String(userHasJoined)},
+        {/* Debug: userHasJoined={String(userHasJoined)},
         debate.status={debate.status},
-        userSide={userSide?.side || 'none'}
+        isDebateExpired={String(isDebateExpired)},
+        userSide={userSide?.side || 'none'} */}
       </p>
 
-      {!userHasJoined && debate.status === 'active' ? (
+      {!userHasJoined && !isDebateExpired ? (
         <form action={joinDebate} className="my-4 bg-red-200">
           <label className="block text-sm font-medium mb-2">Join Debate</label>
           <select name="side" className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
@@ -93,24 +116,25 @@ export default async function DebatePage({ params }) {
           </select>
           <button
             type="submit"
-            className="ml-2 py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+            className="ml-2 py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600"
+            disabled={isDebateExpired} // Disable the join button if debate is expired
           >
             Join
           </button>
         </form>
       ) : (
         <p className="text-sm text-red-500">
-          Join button not shown: userHasJoined={userHasJoined.toString()}, debate.status={debate.status}
+          {/* Join button not shown: userHasJoined={String(userHasJoined ?? 'null')}, isDebateExpired={String(isDebateExpired ?? 'null')} */}
         </p>
       )}
 
       {userHasJoined && <p className="text-lg font-semibold">Your Side: {userSide?.side || 'Not selected'}</p>}
 
       {debate.status === 'active' && userHasJoined && (
-        <ArgumentForm debateId={debate.id} side={userSide?.side} />
+        <ArgumentForm debateId={debate.id} side={userSide?.side} endTime={debate.endsAt} />
       )}
 
-      <ArgumentList argumentList={debate.arguments} debateId={debate.id} status={debate.status} />
+      <ArgumentList argumentList={debate.arguments} debateId={debate.id} status={debate.status} endTime={debate.endsAt} />
     </div>
   );
 }

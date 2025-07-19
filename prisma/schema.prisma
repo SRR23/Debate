@@ -103,4 +103,5 @@ model Vote {
   userId     String
   argument   Argument @relation(fields: [argumentId], references: [id])
   argumentId String
+  createdAt DateTime @default(now())
 }

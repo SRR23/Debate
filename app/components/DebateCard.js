@@ -9,8 +9,12 @@ export default function DebateCard({ debate }) {
   // Fallback image URL for when debate.image is invalid or missing
   const fallbackImage = '/images/next.svg'; // Ensure this exists in your public folder
 
-  // Log the image URL for debugging
+  // Check if the debate has expired based on endsAt or status
+  const isDebateExpired = debate.status !== 'active' || (debate.endsAt && new Date(debate.endsAt) < new Date());
+
+  // Log the image URL and expiration status for debugging
   console.log('Debate image:', debate.image);
+  console.log('Debate status:', debate.status, 'endsAt:', debate.endsAt, 'isDebateExpired:', isDebateExpired);
 
   return (
     <motion.div
@@ -22,9 +26,12 @@ export default function DebateCard({ debate }) {
       <p className="text-gray-600 dark:text-gray-300">{debate.description}</p>
       <p className="text-sm text-gray-500 dark:text-gray-400">Category: {debate.category}</p>
       <p className="text-sm text-gray-500 dark:text-gray-400">Tags: {debate.tags.join(', ')}</p>
+      {isDebateExpired && (
+        <p className="text-sm font-semibold text-red-500 dark:text-red-400">Debate Over</p>
+      )}
       {debate.image ? (
         <Image
-          src={debate.image} // Changed from imageUrl to image
+          src={debate.image}
           alt={debate.title}
           width={640} // Adjust based on your design
           height={192} // Matches h-48 (48 * 4 = 192px)
@@ -56,6 +63,8 @@ DebateCard.propTypes = {
     description: PropTypes.string.isRequired,
     category: PropTypes.string.isRequired,
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-    image: PropTypes.string, // Changed from imageUrl to image
+    image: PropTypes.string,
+    status: PropTypes.string.isRequired, // Added status
+    endsAt: PropTypes.string, // Added endsAt (optional)
   }).isRequired,
 };

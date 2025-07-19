@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
-export default function ArgumentList({ argumentList, debateId, status }) {
+export default function ArgumentList({ argumentList, debateId, status, endTime }) {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -15,6 +15,9 @@ export default function ArgumentList({ argumentList, debateId, status }) {
 
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState('');
+
+  // Check if the debate has expired based on status or endTime
+  const isDebateExpired = status !== 'active' || (endTime && new Date(endTime) < new Date());
 
   const handleEditClick = (arg) => {
     setEditingId(arg.id);
@@ -41,10 +44,14 @@ export default function ArgumentList({ argumentList, debateId, status }) {
     }
   };
 
-
   const handleVote = async (argumentId) => {
     if (!session) {
       alert('Please log in to vote');
+      return;
+    }
+
+    if (isDebateExpired) {
+      alert('This debate has ended. Voting is no longer available.');
       return;
     }
 
@@ -137,14 +144,13 @@ export default function ArgumentList({ argumentList, debateId, status }) {
                     By {arg.author.name || 'Anonymous'} at {new Date(arg.createdAt).toLocaleString()}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Votes: {arg.votes.length}</p>
-                  {status === 'active' && (
-                    <button
-                      onClick={() => handleVote(arg.id)}
-                      className="mt-2 py-1 px-3 bg-green-600 text-white rounded hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
-                    >
-                      Vote
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleVote(arg.id)}
+                    className="mt-2 py-1 px-3 bg-green-600 text-white rounded hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 disabled:bg-gray-400 dark:disabled:bg-gray-600"
+                    disabled={isDebateExpired} // Disable the vote button if debate is expired
+                  >
+                    Vote
+                  </button>
                   {canEditOrDelete && (
                     <>
                       <button
@@ -189,4 +195,5 @@ ArgumentList.propTypes = {
   ).isRequired,
   debateId: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
+  endTime: PropTypes.string, // Optional endTime prop
 };
