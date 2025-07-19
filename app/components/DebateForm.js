@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-// No external icon dependencies needed
+import Image from 'next/image';
 
 const schema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
@@ -253,10 +253,12 @@ export default function DebateForm() {
               ) : (
                 <div className="relative bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
                   <div className="flex items-center space-x-4">
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview" 
-                      className="h-20 w-20 object-cover rounded-xl shadow-md" 
+                    <Image
+                      src={imagePreview}
+                      alt="Preview"
+                      width={80}
+                      height={80}
+                      className="h-20 w-20 object-cover rounded-xl shadow-md"
                     />
                     <div className="flex-1">
                       <p className="font-medium text-gray-900 dark:text-white">
