@@ -1,13 +1,11 @@
-// app/layout.js
 import './globals.css';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './api/auth/[...nextauth]/route';
 import Link from 'next/link';
 import ThemeToggle from './components/ThemeToggle';
-import SignOutButton from './components/SignOutButton'; // Import the new component
-import SessionProviderWrapper from './components/SessionProviderWrapper'; // Import the SessionProviderWrapper
-import SearchForm from './components/SearchForm'; // Import the SearchForm component
-
+import SignOutButton from './components/SignOutButton';
+import SessionProviderWrapper from './components/SessionProviderWrapper';
+import SearchForm from './components/SearchForm';
 
 export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
@@ -18,13 +16,20 @@ export default async function RootLayout({ children }) {
         <SessionProviderWrapper session={session}>
           <nav className="bg-blue-600 dark:bg-blue-800 text-white p-4">
             <div className="container mx-auto flex justify-between items-center">
-              <div className="space-x-4">
+              {/* Left: Navigation Links */}
+              <div className="flex space-x-4">
                 <Link href="/">Home</Link>
                 <Link href="/debates">Debates</Link>
                 <Link href="/scoreboard">Scoreboard</Link>
                 {session && <Link href="/debates/create">Create Debate</Link>}
+              </div>
+
+              {/* Center: Search Form */}
+              <div className="flex-1 flex justify-center">
                 <SearchForm />
               </div>
+
+              {/* Right: User Info and Theme Toggle */}
               <div className="flex items-center space-x-4">
                 {session ? (
                   <>

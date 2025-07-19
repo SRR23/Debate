@@ -1,20 +1,35 @@
-
 import DebateCard from '../components/DebateCard';
-import prisma from '../lib/prisma'; // Adjust the import path as necessary
+import prisma from '../lib/prisma';
 
-export default async function Debates() {
+export default async function Debates({ searchParams }) {
+  const q = searchParams?.search || '';
+
+  // Fetch debates based on search query
   const debates = await prisma.debate.findMany({
+    where: {
+      OR: [
+        { title: { contains: q, mode: 'insensitive' } },
+        { tags: { has: q } },
+        { category: { contains: q, mode: 'insensitive' } },
+      ],
+    },
     include: { creator: true },
+    take: 20,
   });
-  console.log('Debates:', debates); // Log to inspect image fields
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">All Debates</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {q ? `Search Results for "${q}"` : 'All Debates'}
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {debates.map((debate) => (
-          <DebateCard key={debate.id} debate={debate} />
-        ))}
+        {debates.length > 0 ? (
+          debates.map((debate) => (
+            <DebateCard key={debate.id} debate={debate} />
+          ))
+        ) : (
+          <p>No debates found.</p>
+        )}
       </div>
     </div>
   );
