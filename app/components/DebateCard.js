@@ -81,9 +81,9 @@ export default function DebateCard({ debate }) {
         </h2>
 
         {/* Description */}
-        <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3 leading-relaxed">
+        {/* <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3 leading-relaxed">
           {debate.description}
-        </p>
+        </p> */}
 
         {/* Owner Name */}
         <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
