@@ -2,22 +2,36 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #FD7E14; /* Black text in light mode */
+  --foreground: #FD7E14; /* Orange text in light mode */
 }
 
-body {
-  background: var(--background);
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed; /* Light gray text in dark mode */
+}
+
+/* Apply background and text color to all elements */
+body, html, #__next, .modal, .modal-content, .ui-container, * {
+  background-color: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Ensure all text is black in light mode */
-:root:not(.dark) * {
-  color: #FD7E14;
+/* Ensure no element overrides the background unless explicitly needed */
+* {
+  background-color: inherit;
 }
 
-/* Allow specific dark mode text colors to override */
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+/* Allow specific overrides for components */
+button, input, select, textarea, .card, .panel {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Tailwind-specific overrides to ensure consistency */
+.bg-background {
+  background-color: var(--background) !important;
+}
+.text-foreground {
+  color: var(--foreground) !important;
 }
