@@ -89,7 +89,7 @@ export default async function Debates({ searchParams }) {
         </div>
       </Suspense>
       {/* Pagination controls */}
-      <div className="mt-6 flex justify-center">
+      {/* <div className="mt-6 flex justify-center">
         <a
           href={`?page=${page - 1}${q ? `&search=${encodeURIComponent(q)}` : ''}`}
           className={`px-4 py-2 mx-1 bg-gray-200 rounded ${page === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -103,7 +103,7 @@ export default async function Debates({ searchParams }) {
         >
           Next
         </a>
-      </div>
+      </div> */}
     </div>
   );
 }
