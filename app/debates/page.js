@@ -5,22 +5,69 @@ import DebateCardSkeleton from '../skeleton/DebateCardSkeleton';
 
 export default async function Debates({ searchParams }) {
   const resolvedSearchParams = await searchParams;
-  const q = resolvedSearchParams?.search || '';
+  const q = resolvedSearchParams?.search?.trim() || '';
+  const page = parseInt(resolvedSearchParams?.page) || 1;
+  const pageSize = 20;
 
   let debates = [];
 
   try {
-    debates = await prisma.debate.findMany({
-      where: {
-        OR: [
-          { title: { contains: q, mode: 'insensitive' } },
-          { tags: { has: q } },
-          { category: { contains: q, mode: 'insensitive' } },
-        ],
-      },
-      include: { creator: true },
-      take: 20,
-    });
+    if (q.length > 0) {
+      // Use full-text search for title and category
+      debates = await prisma.debate.findMany({
+        where: {
+          OR: [
+            {
+              title: {
+                search: q, // Prisma's full-text search for PostgreSQL
+              },
+            },
+            {
+              category: {
+                search: q,
+              },
+            },
+            {
+              tags: {
+                has: q,
+              },
+            },
+          ],
+        },
+        include: {
+          creator: {
+            select: {
+              id: true,
+              name: true,
+              image: true, // Only select necessary fields
+            },
+          },
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          createdAt: 'desc', // Sort by most recent
+        },
+      });
+    } else {
+      // If no search query, fetch all debates
+      debates = await prisma.debate.findMany({
+        include: {
+          creator: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    }
   } catch (error) {
     console.error('Error fetching debates:', error);
   }
@@ -41,6 +88,22 @@ export default async function Debates({ searchParams }) {
           )}
         </div>
       </Suspense>
+      {/* Pagination controls */}
+      <div className="mt-6 flex justify-center">
+        <a
+          href={`?page=${page - 1}${q ? `&search=${encodeURIComponent(q)}` : ''}`}
+          className={`px-4 py-2 mx-1 bg-gray-200 rounded ${page === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={page === 1}
+        >
+          Previous
+        </a>
+        <a
+          href={`?page=${page + 1}${q ? `&search=${encodeURIComponent(q)}` : ''}`}
+          className="px-4 py-2 mx-1 bg-gray-200 rounded"
+        >
+          Next
+        </a>
+      </div>
     </div>
   );
 }

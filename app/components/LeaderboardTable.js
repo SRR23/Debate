@@ -29,21 +29,21 @@ export default function LeaderboardTable({ leaderboard, filter }) {
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-white/20 rounded-lg">
-              <span className="text-2xl">🏆</span>
+              <span className="text-xl sm:text-2xl">🏆</span>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Leaderboard</h2>
-              <p className="text-indigo-100 text-sm">Top debaters by performance</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Leaderboard</h2>
+              <p className="text-indigo-100 text-xs sm:text-sm">Top debaters by performance</p>
             </div>
           </div>
-          <div className="inline-flex bg-white/10 backdrop-blur-sm rounded-xl p-1" role="group">
+          <div className="flex flex-wrap gap-2 sm:gap-1 sm:inline-flex bg-white/10 backdrop-blur-sm rounded-xl p-1" role="group">
             <button
               type="button"
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
                 filter === 'weekly'
                   ? 'bg-white text-indigo-600 shadow-md'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -54,7 +54,7 @@ export default function LeaderboardTable({ leaderboard, filter }) {
             </button>
             <button
               type="button"
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
                 filter === 'monthly'
                   ? 'bg-white text-indigo-600 shadow-md'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -65,7 +65,7 @@ export default function LeaderboardTable({ leaderboard, filter }) {
             </button>
             <button
               type="button"
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
                 filter === 'all'
                   ? 'bg-white text-indigo-600 shadow-md'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -83,13 +83,13 @@ export default function LeaderboardTable({ leaderboard, filter }) {
           initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
           animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
           transition={shouldReduceMotion ? {} : { duration: 0.3 }}
-          className="p-12 text-center"
+          className="p-8 sm:p-12 text-center"
         >
-          <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-            <span className="text-4xl">👥</span>
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+            <span className="text-3xl sm:text-4xl">👥</span>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Data Available</h3>
-          <p className="text-gray-500 dark:text-gray-400">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">No Data Available</h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">
             No debate activity found for the selected time period.
           </p>
         </motion.div>
@@ -98,19 +98,19 @@ export default function LeaderboardTable({ leaderboard, filter }) {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                   Rank
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                   Debater
                 </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center justify-center space-x-1">
                     <span className="text-blue-600 dark:text-blue-400">📊</span>
                     <span>Total Votes</span>
                   </div>
                 </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center justify-center space-x-1">
                     <span className="text-green-600 dark:text-green-400">💬</span>
                     <span>Debates</span>
@@ -127,11 +127,11 @@ export default function LeaderboardTable({ leaderboard, filter }) {
                   transition={shouldReduceMotion ? {} : { duration: 0.2 }}
                   className={`transition-colors duration-200 ${getRankStyle(index + 1)}`}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-3">
+                  <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                       {getRankIcon(index + 1)}
                       <span
-                        className={`text-lg font-bold ${
+                        className={`text-base sm:text-lg font-bold ${
                           index + 1 <= 3 ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'
                         }`}
                       >
@@ -139,13 +139,13 @@ export default function LeaderboardTable({ leaderboard, filter }) {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm">
                         {user.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-lg font-semibold text-gray-900 dark:text-white">{user.name}</div>
+                        <div className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">{user.name}</div>
                         {index + 1 <= 3 && (
                           <div className="text-xs text-gray-500 dark:text-gray-400">
                             {index + 1 === 1 ? 'Champion' : index + 1 === 2 ? 'Runner-up' : 'Third Place'}
@@ -154,14 +154,14 @@ export default function LeaderboardTable({ leaderboard, filter }) {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
-                      <span className="text-lg font-bold">{user.totalVotes.toLocaleString()}</span>
+                  <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
+                    <div className="inline-flex items-center px-2 sm:px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
+                      <span className="text-base sm:text-lg font-bold">{user.totalVotes.toLocaleString()}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="inline-flex items-center px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full">
-                      <span className="text-lg font-bold">{user.debatesCount}</span>
+                  <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
+                    <div className="inline-flex items-center px-2 sm:px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full">
+                      <span className="text-base sm:text-lg font-bold">{user.debatesCount}</span>
                     </div>
                   </td>
                 </motion.tr>

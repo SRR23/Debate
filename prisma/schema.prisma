@@ -73,6 +73,10 @@ model Debate {
   participants   User[]       @relation("Participants")
   arguments      Argument[]
   sideChoices    SideChoice[]
+
+  // Add indexes for fields used in search
+  @@index([title])
+  @@index([category])
 }
 
 model Argument {
