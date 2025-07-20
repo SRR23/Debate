@@ -60,15 +60,12 @@ export default function ArgumentList({ argumentList, debateId, status, endTime }
       });
 
       if (response.ok) {
-        // console.log('Vote successful: argumentId=', argumentId);
         router.refresh();
       } else {
         const errorData = await response.json();
-        // console.error('Failed to vote:', errorData);
         alert(`Failed to vote: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      // console.error('Error voting:', error);
       alert('An error occurred while voting');
     }
   };
@@ -85,18 +82,15 @@ export default function ArgumentList({ argumentList, debateId, status, endTime }
         router.refresh();
       } else {
         const errorData = await response.json();
-        // console.error('Failed to delete argument:', errorData);
         alert(`Failed to delete argument: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      // console.error('Error deleting argument:', error);
       alert('An error occurred while deleting the argument');
     }
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Arguments</h2>
+    <div className="p-6 space-y-6">
       {argumentList && argumentList.length > 0 ? (
         argumentList.map((arg) => {
           const canEditOrDelete =
@@ -109,66 +103,104 @@ export default function ArgumentList({ argumentList, debateId, status, endTime }
               key={arg.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow"
+              transition={{ duration: 0.3 }}
+              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-100 dark:border-gray-700"
             >
               {editingId === arg.id ? (
-                <div>
-                  <input
-                    type="text"
+                <div className="space-y-4">
+                  <textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all duration-200"
+                    rows={4}
                   />
-                  <button
-                    onClick={() => handleEditSave(arg.id)}
-                    className="mt-2 py-1 px-3 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="mt-2 ml-2 py-1 px-3 bg-gray-400 text-white rounded hover:bg-gray-500"
-                  >
-                    Cancel
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleEditSave(arg.id)}
+                      className="py-2 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all duration-200"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="py-2 px-4 bg-gray-400 text-white rounded-xl hover:bg-gray-500 dark:bg-gray-500 dark:hover:bg-gray-600 transition-all duration-200"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <>
-                  <p className="font-semibold">{arg.side.toUpperCase()}: {arg.content}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    By {arg.author.name || 'Anonymous'} at {new Date(arg.createdAt).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Votes: {arg.votes.length}</p>
-                  <button
-                    onClick={() => handleVote(arg.id)}
-                    className="mt-2 py-1 px-3 bg-green-600 text-white rounded hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 disabled:bg-gray-400 dark:disabled:bg-gray-600"
-                    disabled={isDebateExpired} // Disable the vote button if debate is expired
-                  >
-                    Vote
-                  </button>
-                  {canEditOrDelete && (
-                    <>
-                      <button
-                        onClick={() => handleEditClick(arg)}
-                        className="mt-2 ml-2 py-1 px-3 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(arg.id)}
-                        className="mt-2 ml-2 py-1 px-3 bg-red-600 text-white rounded hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${arg.side === 'support' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                      <svg className={`w-5 h-5 ${arg.side === 'support' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={arg.side === 'support' ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'} />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        <span className={`uppercase ${arg.side === 'support' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{arg.side}</span>: {arg.content}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        By {arg.author.name || 'Anonymous'} at {new Date(arg.createdAt).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Votes: {arg.votes.length}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 mt-3">
+                    <button
+                      onClick={() => handleVote(arg.id)}
+                      className={`py-2 px-4 bg-green-600 text-white rounded-xl hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 transition-all duration-200 ${isDebateExpired ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
+                      disabled={isDebateExpired}
+                    >
+                      Vote
+                    </button>
+                    {canEditOrDelete && (
+                      <>
+                        <button
+                          onClick={() => handleEditClick(arg)}
+                          className="py-2 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all duration-200"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(arg.id)}
+                          className="py-2 px-4 bg-red-600 text-white rounded-xl hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 transition-all duration-200"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </>
               )}
             </motion.div>
           );
         })
       ) : (
-        <p className="text-gray-500 dark:text-gray-400">No arguments yet.</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-700 text-center">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Arguments Yet</h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            {isDebateExpired
+              ? 'This debate has no arguments.'
+              : session
+              ? 'Be the first to share your perspective!'
+              : 'Join the debate to share your arguments.'}
+          </p>
+          {!isDebateExpired && !session && (
+            <button
+              onClick={() => router.push('/api/auth/signin')}
+              className="py-2 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            >
+              Sign In to Join
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -190,5 +222,5 @@ ArgumentList.propTypes = {
   ).isRequired,
   debateId: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
-  endTime: PropTypes.string, // Optional endTime prop
+  endTime: PropTypes.string,
 };
