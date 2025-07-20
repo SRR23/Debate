@@ -2,67 +2,22 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #FD7E14; /* Orange text in light mode */
+  --foreground: #FD7E14; /* Black text in light mode */
 }
 
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed; /* Light gray text in dark mode */
-}
-
-/* Apply background and text color to main UI containers */
-body, html, #__next, .modal, .modal-content, .ui-container {
-  background-color: var(--background);
+body {
+  background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Ensure child elements inherit background only when needed */
-main, section, div:not(.hamburger, .button, .card, .panel, button, input, select, textarea) {
-  background-color: inherit;
+/* Ensure all text is black in light mode */
+:root:not(.dark) * {
+  color: #FD7E14;
 }
 
-/* Specific styles for buttons to preserve their appearance */
-button, .button {
-  background-color: var(--background);
-  color: var(--foreground);
-  border: 1px solid var(--foreground);
-  border-radius: 0.375rem; /* Tailwind's rounded-md */
-  padding: 0.5rem 1rem; /* Tailwind's p-2 */
-  transition: background-color 0.2s, color 0.2s;
-}
-
-/* Ensure hamburger icon is visible in both modes */
-.hamburger, .hamburger * {
-  background-color: transparent !important;
-  color: var(--foreground) !important;
-  fill: var(--foreground) !important; /* For SVG icons */
-  stroke: var(--foreground) !important; /* For SVG icons */
-}
-
-/* Specific overrides for other components */
-input, select, textarea, .card, .panel {
-  background-color: var(--background);
-  color: var(--foreground);
-  border: 1px solid var(--foreground);
-}
-
-/* Tailwind-specific overrides to ensure consistency */
-.bg-background {
-  background-color: var(--background) !important;
-}
-.text-foreground {
-  color: var(--foreground) !important;
-}
-
-/* Media query for mobile screens to ensure hamburger icon visibility */
-@media (max-width: 640px) {
-  .hamburger, .hamburger * {
-    display: block !important;
-    visibility: visible !important;
-    background-color: transparent !important;
-    color: var(--foreground) !important;
-    fill: var(--foreground) !important;
-    stroke: var(--foreground) !important;
-  }
+/* Allow specific dark mode text colors to override */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
