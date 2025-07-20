@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Community Debate
 
-First, run the development server:
+A full-stack web platform where users can create and join debates, post arguments, vote on responses, and track their performance on a public scoreboard.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Built using Next.js 15 (App Router), Prisma, PostgreSQL, NextAuth, Cloudinary, and Tailwind CSS.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- User authentication with GitHub login via NextAuth.js.
+- Debate creation with title, description, tags, category, image, and duration.
+- Users join one side (Support or Oppose) per debate.
+- Argument posting system with vote count and edit/delete option (within 5 minutes).
+- Voting system: one vote per argument per user
+- Debate auto-close after timer ends, winner decided by vote count.
+- Scoreboard leaderboard with weekly/monthly/all-time filters.
+- Auto-moderation to block banned words in arguments (e.g., “stupid”, “idiot”, “dumb”).
+- Mobile responsive UI with dark/light mode toggle.
+- Search and filter debates by tag, title, or category.
 
-## Learn More
+## Installation
 
-To learn more about Next.js, take a look at the following resources:
+    Clone the Repository:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    git clone https://github.com/SRR23/Debate.git
+    cd Debate
+    
+## Configure Environment Variable
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+    DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+    CLOUDINARY_CLOUD_NAME=your_cloud_name
+    CLOUDINARY_API_KEY=your_api_key
+    CLOUDINARY_API_SECRET=your_api_secret
+    NEXTAUTH_URL=http://localhost:3000
+    GITHUB_ID=your_github_client_id
+    GITHUB_SECRET=your_github_client_secret
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Run Prisma
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    npx prisma generate
+    npx prisma migrate dev
+
+## Start Server
+
+    npm run dev
+
+## Technologies Used
+
+    Next.js
+    Tailwind CSS
+    Prisma
+    Postgresql
+    Cloudinary # For store image
+    NextAuth.js
+    Zod
+    React Hook Form
+    Framer Motion
